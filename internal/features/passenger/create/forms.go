@@ -51,3 +51,7 @@ type AdminPassengerForm struct {
 	*SelfPassengerForm
 	*MaybeAdmin
 }
+
+func (f *AdminPassengerForm) SetAdminUserId(userId uint64) {
+	f.MaybeAdmin = &MaybeAdmin{UserId: userId}
+}

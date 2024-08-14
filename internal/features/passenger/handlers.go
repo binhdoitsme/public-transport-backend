@@ -42,7 +42,9 @@ func (h *handler) handleAdminCreatePassenger(ctx *gin.Context) {
 		return
 	}
 
-	form.UserId = ctx.GetUint64("userId")
+	if userId, exists := ctx.Get("userId"); exists {
+		form.SetAdminUserId(userId.(uint64))
+	}
 
 	dependencies := h.dependencies.CreateDependenciesFactory()
 

@@ -22,7 +22,7 @@ func AdminCreatePassenger(
 	}
 
 	if !isAdmin {
-		return nil, commonErrors.NotAnAdminError(form.UserId)
+		return nil, commonErrors.NotAnAdminError()
 	}
 
 	existed, err := dependencies.Repository.ExistsByPhoneNumberOrVneId(ctx, form.PhoneNumber, form.VneID)

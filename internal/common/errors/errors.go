@@ -16,6 +16,6 @@ func ToValidationError(err error) error {
 	return fmt.Errorf("ERR_001: %s", err.Error())
 }
 
-func NotAnAdminError(userId uint64) error {
-	return fmt.Errorf("ERR_002: UserId %d does not have privileges to perform this action", userId)
+func NotAnAdminError() error {
+	return fmt.Errorf("ERR_002: Current user does not have privileges to perform this action")
 }

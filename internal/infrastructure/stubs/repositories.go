@@ -43,6 +43,9 @@ func (r *PassengerRepositoryStub) Save(ctx context.Context, account *passenger.A
 
 // IsAdmin checks if a given user is an admin.
 func (r *PassengerRepositoryStub) IsAdmin(ctx context.Context, maybeAdmin *create.MaybeAdmin) (bool, error) {
+	if maybeAdmin == nil {
+		return false, nil
+	}
 	isAdmin, exists := r.Admins[maybeAdmin.UserId]
 	if !exists {
 		return false, nil
