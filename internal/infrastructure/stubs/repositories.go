@@ -5,20 +5,22 @@ import (
 	"errors"
 	"public-transport-backend/internal/features/passenger/create"
 	passenger "public-transport-backend/internal/features/passenger/domain"
+	"public-transport-backend/internal/features/passenger/view"
 )
 
 // PassengerRepositoryStub is a stub implementation of the Repository interface.
 type PassengerRepositoryStub struct {
-	// You can add fields here to store in-memory data if needed
 	Passengers map[string]*passenger.Account
 	Admins     map[uint64]bool
 }
 
-// NewPassengerRepository creates a new instance of RepositoryStub with initialized data.
+// NewPassengerRepository creates a new instance of PassengerRepositoryStub with initialized data.
 func NewPassengerRepository() *PassengerRepositoryStub {
+	admins := make(map[uint64]bool)
+	admins[1] = true
 	return &PassengerRepositoryStub{
 		Passengers: make(map[string]*passenger.Account),
-		Admins:     make(map[uint64]bool),
+		Admins:     admins,
 	}
 }
 
@@ -51,4 +53,38 @@ func (r *PassengerRepositoryStub) IsAdmin(ctx context.Context, maybeAdmin *creat
 		return false, nil
 	}
 	return isAdmin, nil
+}
+
+// IsAdmin checks if a given user is an admin.
+func (r *PassengerRepositoryStub) IsAdminUser(ctx context.Context, requestingUser *view.RequestingUser) (bool, error) {
+	return r.IsAdmin(ctx, &create.MaybeAdmin{UserId: requestingUser.UserId})
+}
+
+// FindById finds a passenger account by its ID.
+func (r *PassengerRepositoryStub) FindById(ctx context.Context, id uint64) (*passenger.Account, error) {
+	for _, account := range r.Passengers {
+		if account.Id == id {
+			return account, nil
+		}
+	}
+	return nil, nil
+}
+
+// FindByUserId finds a passenger account by its User ID.
+func (r *PassengerRepositoryStub) FindByUserId(ctx context.Context, userId uint64) (*passenger.Account, error) {
+	for _, account := range r.Passengers {
+		if account.Id == userId {
+			return account, nil
+		}
+	}
+	return nil, errors.New("account not found")
+}
+
+// FindAll returns a list of all passenger accounts.
+func (r *PassengerRepositoryStub) FindAll(ctx context.Context) ([]passenger.Account, error) {
+	accounts := make([]passenger.Account, 0, len(r.Passengers))
+	for _, account := range r.Passengers {
+		accounts = append(accounts, *account)
+	}
+	return accounts, nil
 }

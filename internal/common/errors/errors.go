@@ -19,3 +19,7 @@ func ToValidationError(err error) error {
 func NotAnAdminError() error {
 	return fmt.Errorf("ERR_002: Current user does not have privileges to perform this action")
 }
+
+func NotAuthorizedError() error {
+	return fmt.Errorf("ERR_003: You need to log in to perform this action")
+}
