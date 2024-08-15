@@ -36,15 +36,18 @@ func (h *handler) handleSelfCreatePassenger(ctx *gin.Context) {
 }
 
 func (h *handler) handleAdminCreatePassenger(ctx *gin.Context) {
+	userId, exists := ctx.Get("userId")
+	if !exists {
+		responses.Error(ctx, http.StatusUnauthorized, commonErrors.NotAnAdminError().Error())
+		return
+	}
+
 	var form *create.AdminPassengerForm = &create.AdminPassengerForm{}
 	if err := ctx.BindJSON(form); err != nil {
 		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
 		return
 	}
-
-	if userId, exists := ctx.Get("userId"); exists {
-		form.SetAdminUserId(userId.(uint64))
-	}
+	form.SetAdminUserId(userId.(uint64))
 
 	dependencies := h.dependencies.CreateDependenciesFactory()
 
@@ -61,7 +64,7 @@ func (h *handler) handleAdminCreatePassenger(ctx *gin.Context) {
 
 // func (h *handler) handlePassengerApproval(ctx *gin.Context) {
 
-// }
+// func (h *handler) handlePassengerApproval(ctx *gin.Context) {}
 
 func InitAPIHandlers(g *gin.RouterGroup, dependencies Dependencies) {
 	h := &handler{dependencies}
