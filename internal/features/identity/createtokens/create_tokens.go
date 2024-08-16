@@ -5,7 +5,7 @@ import (
 	commonErrors "public-transport-backend/internal/common/errors"
 )
 
-func NewSession(ctx context.Context, form *NewTokensForm, dependencies *Dependencies) (*SessionResult, error) {
+func NewTokenPair(ctx context.Context, form *NewTokensForm, dependencies *Dependencies) (*SessionResult, error) {
 	if err := form.Validate(dependencies.Validate); err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package dependency
 import (
 	"public-transport-backend/internal/features/identity"
 	"public-transport-backend/internal/features/identity/createtokens"
+	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
 	"public-transport-backend/internal/features/passenger"
 	"public-transport-backend/internal/features/passenger/create"
@@ -22,8 +23,9 @@ type dependencies struct {
 	createPassengerDependencies *create.Dependencies
 	viewPassengerDependencies   *view.Dependencies
 
-	loginDependencies  *createtokens.Dependencies
-	signupDependencies *signup.Dependencies
+	createTokenPairDependencies            *createtokens.Dependencies
+	refreshTokenPairDependencies *refreshtokens.Dependencies
+	signupDependencies           *signup.Dependencies
 }
 
 func (d *dependencies) CreateDependenciesFactory() *create.Dependencies {
@@ -34,8 +36,12 @@ func (d *dependencies) ViewDependenciesFactory() *view.Dependencies {
 	return d.viewPassengerDependencies
 }
 
-func (d *dependencies) LoginDependenciesFactory() *createtokens.Dependencies {
-	return d.loginDependencies
+func (d *dependencies) CreateTokenPairDependenciesFactory() *createtokens.Dependencies {
+	return d.createTokenPairDependencies
+}
+
+func (d *dependencies) RefreshTokenPairDependenciesFactory() *refreshtokens.Dependencies {
+	return d.refreshTokenPairDependencies
 }
 
 func (d *dependencies) SignUpDependenciesFactory() *signup.Dependencies {
@@ -46,7 +52,7 @@ func New() Dependencies {
 	validate := validator.New()
 	passengerRepository := stubs.NewPassengerRepository()
 	tokenService := stubs.NewTokenServices()
-	accountRepository := stubs.NewAccountRepository()
+	accountRepository := stubs.NewAccountRepository(tokenService)
 	passwordService := stubs.NewPasswordServices()
 	return &dependencies{
 		validate: validate,
@@ -60,11 +66,16 @@ func New() Dependencies {
 			Repository: passengerRepository,
 		},
 
-		loginDependencies: &createtokens.Dependencies{
+		createTokenPairDependencies: &createtokens.Dependencies{
 			Validate:          validate,
 			AccountRepository: accountRepository,
 			Tokens:            tokenService,
 			Passwords:         passwordService,
+		},
+		refreshTokenPairDependencies: &refreshtokens.Dependencies{
+			Validate:          validate,
+			AccountRepository: accountRepository,
+			Tokens:            tokenService,
 		},
 		signupDependencies: &signup.Dependencies{
 			Validate:         validate,

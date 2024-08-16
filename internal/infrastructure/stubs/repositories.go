@@ -93,14 +93,15 @@ func (r *PassengerRepositoryStub) FindAll(ctx context.Context) ([]passenger.Acco
 // ------------------------------------
 // AccountRepositoryStub is a stub implementation of the AccountRepository interface.
 type AccountRepositoryStub struct {
-	// Sample data for accounts, stored by ID
-	Accounts map[uint64]*identity.Account
+	Accounts     map[uint64]*identity.Account
+	TokenService *TokenServicesStub // Injected TokenServiceStub
 }
 
-// NewAccountRepository creates a new instance of AccountRepositoryStub with some seeded data.
-func NewAccountRepository() *AccountRepositoryStub {
+// NewAccountRepositoryStub creates a new instance of AccountRepositoryStub.
+func NewAccountRepository(tokenService *TokenServicesStub) *AccountRepositoryStub {
 	return &AccountRepositoryStub{
-		Accounts: make(map[uint64]*identity.Account),
+		Accounts:     make(map[uint64]*identity.Account),
+		TokenService: tokenService, // Injected dependency
 	}
 }
 
@@ -142,5 +143,22 @@ func (r *AccountRepositoryStub) FindById(ctx context.Context, id uint64) (*ident
 	if !exists {
 		return nil, errors.New("account not found")
 	}
+	return account, nil
+}
+
+// FindByRefreshToken uses the TokenServiceStub to find an account by refresh token.
+func (r *AccountRepositoryStub) FindByRefreshToken(ctx context.Context, refreshToken string) (*identity.Account, error) {
+	// Use the TokenService to parse the refresh token
+	account, err := r.TokenService.Parse(refreshToken)
+	if err != nil {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	// Verify the account exists in the repository
+	_, exists := r.Accounts[account.Id]
+	if !exists {
+		return nil, errors.New("account not found")
+	}
+
 	return account, nil
 }

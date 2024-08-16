@@ -5,13 +5,15 @@ import (
 	commonErrors "public-transport-backend/internal/common/errors"
 	"public-transport-backend/internal/common/responses"
 	"public-transport-backend/internal/features/identity/createtokens"
+	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Dependencies interface {
-	LoginDependenciesFactory() *createtokens.Dependencies
+	CreateTokenPairDependenciesFactory() *createtokens.Dependencies
+	RefreshTokenPairDependenciesFactory() *refreshtokens.Dependencies
 	SignUpDependenciesFactory() *signup.Dependencies
 }
 
@@ -44,7 +46,7 @@ func (h *handler) handleNewTokenPair(ctx *gin.Context) {
 		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
 		return
 	}
-	result, err := createtokens.NewSession(ctx, form, h.dependencies.LoginDependenciesFactory())
+	result, err := createtokens.NewTokenPair(ctx, form, h.dependencies.CreateTokenPairDependenciesFactory())
 	if err != nil {
 		responses.Error(ctx, http.StatusBadRequest, err.Error())
 		return
@@ -63,9 +65,28 @@ func (h *handler) handleNewTokenPair(ctx *gin.Context) {
 	responses.Data(ctx, http.StatusCreated, result)
 }
 
-func (h *handler) handleRefreshTokenPair(ctx *gin.Context) {}
-func (h *handler) handleRevokeTokenPair(ctx *gin.Context)  {}
-func (h *handler) handleChangePassword(ctx *gin.Context)   {}
+func (h *handler) handleRefreshTokenPair(ctx *gin.Context) {
+	form := &refreshtokens.RefreshTokenForm{}
+	if err := ctx.BindJSON(form); err != nil {
+		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
+		return
+	}
+	result, err := refreshtokens.RefreshTokenPair(
+		ctx, form, h.dependencies.RefreshTokenPairDependenciesFactory())
+
+	if err != nil {
+		responses.Error(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	if !result.Ok {
+		responses.Data(ctx, http.StatusUnauthorized, result)
+		return
+	}
+	responses.Data(ctx, http.StatusCreated, result)
+}
+
+func (h *handler) handleRevokeTokenPair(ctx *gin.Context) {}
+func (h *handler) handleChangePassword(ctx *gin.Context)  {}
 
 func InitAPIHandlers(g *gin.RouterGroup, dependencies Dependencies) {
 	h := &handler{dependencies}
@@ -89,7 +110,7 @@ func InitMiddlewares(g *gin.RouterGroup, dependencies Dependencies) {
 		if err != nil {
 			return
 		}
-		account, err := dependencies.LoginDependenciesFactory().Tokens.Parse(token)
+		account, err := dependencies.CreateTokenPairDependenciesFactory().Tokens.Parse(token)
 		if err != nil {
 			http.SetCookie(ctx.Writer, &http.Cookie{
 				Name:     "token",
