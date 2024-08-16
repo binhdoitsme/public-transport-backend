@@ -3,6 +3,7 @@ package stubs
 import (
 	"context"
 	"errors"
+	identity "public-transport-backend/internal/features/identity/domain"
 	"public-transport-backend/internal/features/passenger/create"
 	passenger "public-transport-backend/internal/features/passenger/domain"
 	"public-transport-backend/internal/features/passenger/view"
@@ -87,4 +88,59 @@ func (r *PassengerRepositoryStub) FindAll(ctx context.Context) ([]passenger.Acco
 		accounts = append(accounts, *account)
 	}
 	return accounts, nil
+}
+
+// ------------------------------------
+// AccountRepositoryStub is a stub implementation of the AccountRepository interface.
+type AccountRepositoryStub struct {
+	// Sample data for accounts, stored by ID
+	Accounts map[uint64]*identity.Account
+}
+
+// NewAccountRepository creates a new instance of AccountRepositoryStub with some seeded data.
+func NewAccountRepository() *AccountRepositoryStub {
+	return &AccountRepositoryStub{
+		Accounts: make(map[uint64]*identity.Account),
+	}
+}
+
+// ExistsByUsername checks if an account exists by username.
+func (r *AccountRepositoryStub) ExistsByUsername(username string) (bool, error) {
+	for _, account := range r.Accounts {
+		if account.Username == username {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+// Save stores a new account and returns its ID.
+func (r *AccountRepositoryStub) Save(account *identity.Account) (uint64, error) {
+	if account == nil {
+		return 0, errors.New("account cannot be nil")
+	}
+	// Assign a new ID
+	r.Accounts[account.Id] = account
+	return account.Id, nil
+}
+
+// FindByPhoneNumberAndPassword searches for an account by phone number and password.
+func (r *AccountRepositoryStub) FindByUsernameAndPassword(ctx context.Context, username string, password string) (*identity.Account, error) {
+	// Iterate through the accounts and look for a match by username
+	for _, account := range r.Accounts {
+		if account.Username == username && account.Password == password {
+			return account, nil
+		}
+	}
+
+	return nil, errors.New("account not found or incorrect password")
+}
+
+// FindById retrieves an account by its ID.
+func (r *AccountRepositoryStub) FindById(ctx context.Context, id uint64) (*identity.Account, error) {
+	account, exists := r.Accounts[id]
+	if !exists {
+		return nil, errors.New("account not found")
+	}
+	return account, nil
 }

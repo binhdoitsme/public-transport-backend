@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"public-transport-backend/internal/features/identity"
 	"public-transport-backend/internal/features/passenger"
 
 	"github.com/gin-gonic/gin"
@@ -12,12 +13,14 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	api := r.Group("/api")
 	{
+		identity.InitMiddlewares(api, s.dependencies)
+
 		api.GET("/", s.HelloWorldHandler)
 		api.GET("/health", s.healthHandler)
 
+		identity.InitAPIHandlers(api, s.dependencies)
 		passenger.InitAPIHandlers(api, s.dependencies)
 	}
-
 
 	return r
 }
