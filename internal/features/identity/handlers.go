@@ -6,6 +6,7 @@ import (
 	"public-transport-backend/internal/common/responses"
 	"public-transport-backend/internal/features/identity/createtokens"
 	"public-transport-backend/internal/features/identity/invalidatetokens"
+	"public-transport-backend/internal/features/identity/me"
 	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
 
@@ -17,6 +18,7 @@ type Dependencies interface {
 	RefreshTokenPairDependenciesFactory() *refreshtokens.Dependencies
 	InvalidateTokenPairDependenciesFactory() *invalidatetokens.Dependencies
 	SignUpDependenciesFactory() *signup.Dependencies
+	GetMyProfileDependenciesFactory() *me.Dependencies
 }
 
 type handler struct {
@@ -39,7 +41,18 @@ func (h *handler) handleNewProfile(ctx *gin.Context) {
 }
 
 func (h *handler) handleGetMyProfile(ctx *gin.Context) {
+	form := &me.GetMyProfileForm{}
+	if err := ctx.BindJSON(form); err != nil {
+		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
+		return
+	}
 
+	result, err := me.GetMyProfile(ctx, form, h.dependencies.GetMyProfileDependenciesFactory())
+	if err != nil {
+		responses.Error(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	responses.Data(ctx, http.StatusOK, result)
 }
 
 func (h *handler) handleNewTokenPair(ctx *gin.Context) {

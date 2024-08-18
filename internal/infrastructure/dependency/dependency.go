@@ -4,6 +4,7 @@ import (
 	"public-transport-backend/internal/features/identity"
 	"public-transport-backend/internal/features/identity/createtokens"
 	"public-transport-backend/internal/features/identity/invalidatetokens"
+	"public-transport-backend/internal/features/identity/me"
 	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
 	"public-transport-backend/internal/features/passenger"
@@ -28,6 +29,7 @@ type dependencies struct {
 	refreshTokenPairDependencies    *refreshtokens.Dependencies
 	invalidateTokenPairDependencies *invalidatetokens.Dependencies
 	signupDependencies              *signup.Dependencies
+	getMyProfileDependencies        *me.Dependencies
 }
 
 func (d *dependencies) CreateDependenciesFactory() *create.Dependencies {
@@ -52,6 +54,10 @@ func (d *dependencies) InvalidateTokenPairDependenciesFactory() *invalidatetoken
 
 func (d *dependencies) SignUpDependenciesFactory() *signup.Dependencies {
 	return d.signupDependencies
+}
+
+func (d *dependencies) GetMyProfileDependenciesFactory() *me.Dependencies {
+	return d.getMyProfileDependencies
 }
 
 func New() Dependencies {
@@ -91,6 +97,11 @@ func New() Dependencies {
 			Validate:         validate,
 			Repository:       accountRepository,
 			PasswordServices: passwordService,
+		},
+		getMyProfileDependencies: &me.Dependencies{
+			Validate:          validate,
+			AccountRepository: accountRepository,
+			Tokens:            tokenService,
 		},
 	}
 }
