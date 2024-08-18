@@ -3,6 +3,7 @@ package dependency
 import (
 	"public-transport-backend/internal/features/identity"
 	"public-transport-backend/internal/features/identity/createtokens"
+	"public-transport-backend/internal/features/identity/invalidatetokens"
 	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
 	"public-transport-backend/internal/features/passenger"
@@ -23,9 +24,10 @@ type dependencies struct {
 	createPassengerDependencies *create.Dependencies
 	viewPassengerDependencies   *view.Dependencies
 
-	createTokenPairDependencies            *createtokens.Dependencies
-	refreshTokenPairDependencies *refreshtokens.Dependencies
-	signupDependencies           *signup.Dependencies
+	createTokenPairDependencies     *createtokens.Dependencies
+	refreshTokenPairDependencies    *refreshtokens.Dependencies
+	invalidateTokenPairDependencies *invalidatetokens.Dependencies
+	signupDependencies              *signup.Dependencies
 }
 
 func (d *dependencies) CreateDependenciesFactory() *create.Dependencies {
@@ -42,6 +44,10 @@ func (d *dependencies) CreateTokenPairDependenciesFactory() *createtokens.Depend
 
 func (d *dependencies) RefreshTokenPairDependenciesFactory() *refreshtokens.Dependencies {
 	return d.refreshTokenPairDependencies
+}
+
+func (d *dependencies) InvalidateTokenPairDependenciesFactory() *invalidatetokens.Dependencies {
+	return d.invalidateTokenPairDependencies
 }
 
 func (d *dependencies) SignUpDependenciesFactory() *signup.Dependencies {
@@ -76,6 +82,10 @@ func New() Dependencies {
 			Validate:          validate,
 			AccountRepository: accountRepository,
 			Tokens:            tokenService,
+		},
+		invalidateTokenPairDependencies: &invalidatetokens.Dependencies{
+			Validate:          validate,
+			AccountRepository: accountRepository,
 		},
 		signupDependencies: &signup.Dependencies{
 			Validate:         validate,

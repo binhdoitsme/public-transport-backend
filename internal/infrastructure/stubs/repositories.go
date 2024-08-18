@@ -120,8 +120,28 @@ func (r *AccountRepositoryStub) Save(account *identity.Account) (uint64, error) 
 	if account == nil {
 		return 0, errors.New("account cannot be nil")
 	}
-	// Assign a new ID
+
+	// Check if the account exists already
+	existingAccount, exists := r.Accounts[account.Id]
+	if exists {
+		// Clear old refresh tokens using TokenService
+		for _, token := range existingAccount.RefreshTokens {
+			// Invalidate old refresh tokens
+			delete(r.TokenService.refreshTokens, token.Token)
+		}
+	}
+
+	// Store the updated account
 	r.Accounts[account.Id] = account
+
+	// Add new refresh tokens to TokenService and account
+	for _, refreshToken := range account.RefreshTokens {
+		if refreshToken.Token != "" {
+			// Store the token in the TokenServiceStub
+			r.TokenService.refreshTokens[refreshToken.Token] = account
+		}
+	}
+
 	return account.Id, nil
 }
 
@@ -155,7 +175,17 @@ func (r *AccountRepositoryStub) FindByRefreshToken(ctx context.Context, refreshT
 	}
 
 	// Verify the account exists in the repository
-	_, exists := r.Accounts[account.Id]
+	accountInstance, exists := r.Accounts[account.Id]
+	if !exists {
+		return nil, errors.New("account not found")
+	}
+	exists = false
+	for _, token := range accountInstance.RefreshTokens {
+		if refreshToken == token.Token {
+			exists = true
+			break
+		}
+	}
 	if !exists {
 		return nil, errors.New("account not found")
 	}

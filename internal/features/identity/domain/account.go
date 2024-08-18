@@ -49,11 +49,11 @@ func New(
 		id = &generated
 	}
 	account := &Account{
-		Id:       *id,
-		Username: username,
-		Password: password,
-		Name:     name,
-		Role:     role,
+		Id:            *id,
+		Username:      username,
+		Password:      password,
+		Name:          name,
+		Role:          role,
 		RefreshTokens: make([]RefreshToken, 0),
 	}
 	if personalImage == nil {
@@ -69,7 +69,39 @@ func (account *Account) AddRefreshToken(token string) {
 		return
 	}
 	account.RefreshTokens = append(account.RefreshTokens, RefreshToken{
-		Token: token,
+		Token:      token,
 		Expiration: time.Now().UTC().Add(RefreshTokenTTL),
 	})
+}
+
+// InvalidateAllTokens removes all refresh tokens, useful when the password is changed.
+func (account *Account) InvalidateAllTokens() {
+	account.RefreshTokens = []RefreshToken{}
+}
+
+// RemoveExpiredTokens cleans up expired tokens from the account.
+func (account *Account) RemoveExpiredTokens() {
+	validTokens := []RefreshToken{}
+	now := time.Now().UTC()
+	for _, rt := range account.RefreshTokens {
+		if rt.Expiration.After(now) {
+			validTokens = append(validTokens, rt)
+		}
+	}
+	account.RefreshTokens = validTokens
+}
+
+// InvalidateToken invalidates a specific refresh token by removing it from the account's RefreshTokens slice.
+func (account *Account) InvalidateToken(token string) {
+	if len(token) == 0 {
+		return
+	}
+	// Iterate over the refresh tokens and filter out the one that matches the token to be invalidated.
+	validTokens := []RefreshToken{}
+	for _, rt := range account.RefreshTokens {
+		if rt.Token != token {
+			validTokens = append(validTokens, rt)
+		}
+	}
+	account.RefreshTokens = validTokens
 }

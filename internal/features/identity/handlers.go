@@ -5,6 +5,7 @@ import (
 	commonErrors "public-transport-backend/internal/common/errors"
 	"public-transport-backend/internal/common/responses"
 	"public-transport-backend/internal/features/identity/createtokens"
+	"public-transport-backend/internal/features/identity/invalidatetokens"
 	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
 
@@ -14,6 +15,7 @@ import (
 type Dependencies interface {
 	CreateTokenPairDependenciesFactory() *createtokens.Dependencies
 	RefreshTokenPairDependenciesFactory() *refreshtokens.Dependencies
+	InvalidateTokenPairDependenciesFactory() *invalidatetokens.Dependencies
 	SignUpDependenciesFactory() *signup.Dependencies
 }
 
@@ -85,8 +87,23 @@ func (h *handler) handleRefreshTokenPair(ctx *gin.Context) {
 	responses.Data(ctx, http.StatusCreated, result)
 }
 
-func (h *handler) handleRevokeTokenPair(ctx *gin.Context) {}
-func (h *handler) handleChangePassword(ctx *gin.Context)  {}
+func (h *handler) handleInvalidateTokenPair(ctx *gin.Context) {
+	form := &invalidatetokens.InvalidateTokenForm{}
+	if err := ctx.BindJSON(form); err != nil {
+		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
+		return
+	}
+	result, err := invalidatetokens.InvalidateToken(
+		ctx, form, h.dependencies.InvalidateTokenPairDependenciesFactory())
+
+	if err != nil {
+		responses.Error(ctx, http.StatusBadRequest, err.Error())
+		return
+	}
+	responses.Data(ctx, http.StatusOK, result)
+}
+
+func (h *handler) handleChangePassword(ctx *gin.Context) {}
 
 func InitAPIHandlers(g *gin.RouterGroup, dependencies Dependencies) {
 	h := &handler{dependencies}
@@ -94,7 +111,7 @@ func InitAPIHandlers(g *gin.RouterGroup, dependencies Dependencies) {
 	{
 		tokens.POST("/", h.handleNewTokenPair)
 		tokens.POST("/refresh", h.handleRefreshTokenPair)
-		tokens.DELETE("/", h.handleRevokeTokenPair)
+		tokens.DELETE("/", h.handleInvalidateTokenPair)
 	}
 	profile := g.Group("/v1/profile")
 	{
