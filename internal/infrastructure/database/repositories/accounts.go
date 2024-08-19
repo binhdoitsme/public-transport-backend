@@ -10,12 +10,10 @@ import (
 )
 
 // ------------------------------------
-// AccountRepositoryOnGorm is a stub implementation of the AccountRepository interface.
 type AccountRepositoryOnGorm struct {
 	db *gorm.DB
 }
 
-// NewAccountRepositoryStub creates a new instance of AccountRepositoryStub.
 func NewAccountRepository(db *gorm.DB) *AccountRepositoryOnGorm {
 	return &AccountRepositoryOnGorm{db}
 }
