@@ -9,7 +9,7 @@ import (
 
 type AccountRepository interface {
 	FindByRefreshToken(ctx context.Context, refreshToken string) (*identity.Account, error)
-	Save(account *identity.Account) (uint64, error)
+	Save(ctx context.Context, account *identity.Account) (uint64, error)
 }
 
 type Dependencies struct {

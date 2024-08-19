@@ -1,6 +1,7 @@
 package signup
 
 import (
+	"context"
 	identity "public-transport-backend/internal/features/identity/domain"
 	"public-transport-backend/internal/features/identity/support"
 
@@ -8,8 +9,8 @@ import (
 )
 
 type AccountRepository interface {
-	ExistsByUsername(username string) (bool, error)
-	Save(account *identity.Account) (uint64, error)
+	ExistsByUsername(ctx context.Context, username string) (bool, error)
+	Save(ctx context.Context, account *identity.Account) (uint64, error)
 }
 
 type Dependencies struct {

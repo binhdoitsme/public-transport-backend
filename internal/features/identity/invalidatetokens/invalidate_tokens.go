@@ -27,7 +27,7 @@ func InvalidateToken(
 	}
 	// invalidate
 	account.InvalidateToken(form.RefreshToken)
-	accountRepository.Save(account)
+	accountRepository.Save(ctx, account)
 
 	return &InvalidateTokenResult{Ok: true}, nil
 }

@@ -16,7 +16,7 @@ func CreateUserAccount(
 	}
 
 	repository := dependencies.Repository
-	exists, err := repository.ExistsByUsername(form.Username)
+	exists, err := repository.ExistsByUsername(ctx, form.Username)
 
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)
@@ -30,7 +30,7 @@ func CreateUserAccount(
 		return nil, err
 	}
 
-	id, err := repository.Save(account)
+	id, err := repository.Save(ctx, account)
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)
 	}

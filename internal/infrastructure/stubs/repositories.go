@@ -106,7 +106,7 @@ func NewAccountRepository(tokenService *TokenServicesStub) *AccountRepositoryStu
 }
 
 // ExistsByUsername checks if an account exists by username.
-func (r *AccountRepositoryStub) ExistsByUsername(username string) (bool, error) {
+func (r *AccountRepositoryStub) ExistsByUsername(ctx context.Context, username string) (bool, error) {
 	for _, account := range r.Accounts {
 		if account.Username == username {
 			return true, nil
@@ -116,7 +116,7 @@ func (r *AccountRepositoryStub) ExistsByUsername(username string) (bool, error) 
 }
 
 // Save stores a new account and returns its ID.
-func (r *AccountRepositoryStub) Save(account *identity.Account) (uint64, error) {
+func (r *AccountRepositoryStub) Save(ctx context.Context, account *identity.Account) (uint64, error) {
 	if account == nil {
 		return 0, errors.New("account cannot be nil")
 	}

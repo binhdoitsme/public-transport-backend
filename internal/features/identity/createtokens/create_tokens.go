@@ -35,7 +35,10 @@ func NewTokenPair(ctx context.Context, form *NewTokensForm, dependencies *Depend
 		return nil, commonErrors.ToGenericError(err)
 	}
 	account.AddRefreshToken(refreshToken)
-	dependencies.AccountRepository.Save(account)
+	_, err = dependencies.AccountRepository.Save(ctx, account)
+	if err != nil {
+		return nil, commonErrors.ToGenericError(err)
+	}
 
 	return &SessionResult{
 		Ok: true, RefreshToken: refreshToken, AccessToken: accessToken,

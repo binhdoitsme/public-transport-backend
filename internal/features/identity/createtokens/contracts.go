@@ -9,7 +9,7 @@ import (
 
 type AccountRepository interface {
 	FindByUsernameAndPassword(ctx context.Context, phoneNumber string, password string) (*identity.Account, error)
-	Save(account *identity.Account) (uint64, error)
+	Save(ctx context.Context, account *identity.Account) (uint64, error)
 }
 
 type TokenServices interface {
