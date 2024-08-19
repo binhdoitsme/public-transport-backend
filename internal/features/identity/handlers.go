@@ -9,6 +9,7 @@ import (
 	"public-transport-backend/internal/features/identity/me"
 	"public-transport-backend/internal/features/identity/refreshtokens"
 	"public-transport-backend/internal/features/identity/signup"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -86,6 +87,7 @@ func (h *handler) handleRefreshTokenPair(ctx *gin.Context) {
 		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
 		return
 	}
+	form.Now = time.Now().UTC()
 	result, err := refreshtokens.RefreshTokenPair(
 		ctx, form, h.dependencies.RefreshTokenPairDependenciesFactory())
 
@@ -106,6 +108,7 @@ func (h *handler) handleInvalidateTokenPair(ctx *gin.Context) {
 		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
 		return
 	}
+	form.Now = time.Now().UTC()
 	result, err := invalidatetokens.InvalidateToken(
 		ctx, form, h.dependencies.InvalidateTokenPairDependenciesFactory())
 

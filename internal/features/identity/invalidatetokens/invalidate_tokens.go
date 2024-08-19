@@ -16,7 +16,7 @@ func InvalidateToken(
 
 	accountRepository := dependencies.AccountRepository
 
-	account, err := accountRepository.FindByRefreshToken(ctx, form.RefreshToken)
+	account, err := accountRepository.FindByRefreshToken(ctx, form.RefreshToken, form.Now)
 
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)
@@ -26,7 +26,7 @@ func InvalidateToken(
 		return &InvalidateTokenResult{}, nil
 	}
 	// invalidate
-	account.InvalidateToken(form.RefreshToken)
+	account.InvalidateToken(form.RefreshToken, form.Now)
 	accountRepository.Save(ctx, account)
 
 	return &InvalidateTokenResult{Ok: true}, nil

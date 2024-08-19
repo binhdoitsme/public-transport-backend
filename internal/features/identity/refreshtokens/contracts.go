@@ -3,12 +3,13 @@ package refreshtokens
 import (
 	"context"
 	identity "public-transport-backend/internal/features/identity/domain"
+	"time"
 
 	"github.com/go-playground/validator"
 )
 
 type AccountRepository interface {
-	FindByRefreshToken(ctx context.Context, refreshToken string) (*identity.Account, error)
+	FindByRefreshToken(ctx context.Context, refreshToken string, now time.Time) (*identity.Account, error)
 }
 
 type TokenServices interface {

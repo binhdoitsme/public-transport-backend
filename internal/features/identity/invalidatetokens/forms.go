@@ -1,12 +1,15 @@
 package invalidatetokens
 
 import (
-	"github.com/go-playground/validator"
 	commonErrors "public-transport-backend/internal/common/errors"
+	"time"
+
+	"github.com/go-playground/validator"
 )
 
 type InvalidateTokenForm struct {
-	RefreshToken string `json:"refreshToken" validate:"required"`
+	RefreshToken string    `json:"refreshToken" validate:"required"`
+	Now          time.Time `json:"-" validate:"required"`
 }
 
 func (form *InvalidateTokenForm) Validate(validate *validator.Validate) error {

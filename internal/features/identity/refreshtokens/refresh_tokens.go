@@ -17,7 +17,7 @@ func RefreshTokenPair(
 
 	accountRepository := dependencies.AccountRepository
 
-	account, err := accountRepository.FindByRefreshToken(ctx, form.RefreshToken)
+	account, err := accountRepository.FindByRefreshToken(ctx, form.RefreshToken, form.Now)
 
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)

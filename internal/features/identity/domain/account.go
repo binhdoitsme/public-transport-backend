@@ -80,9 +80,8 @@ func (account *Account) InvalidateAllTokens() {
 }
 
 // RemoveExpiredTokens cleans up expired tokens from the account.
-func (account *Account) RemoveExpiredTokens() {
+func (account *Account) RemoveExpiredTokens(now time.Time) {
 	validTokens := []RefreshToken{}
-	now := time.Now().UTC()
 	for _, rt := range account.RefreshTokens {
 		if rt.Expiration.After(now) {
 			validTokens = append(validTokens, rt)
@@ -92,16 +91,17 @@ func (account *Account) RemoveExpiredTokens() {
 }
 
 // InvalidateToken invalidates a specific refresh token by removing it from the account's RefreshTokens slice.
-func (account *Account) InvalidateToken(token string) {
+func (account *Account) InvalidateToken(token string, now time.Time) {
 	if len(token) == 0 {
 		return
 	}
 	// Iterate over the refresh tokens and filter out the one that matches the token to be invalidated.
 	validTokens := []RefreshToken{}
 	for _, rt := range account.RefreshTokens {
-		if rt.Token != token {
-			validTokens = append(validTokens, rt)
+		if rt.Token == token || rt.Expiration.Before(now) {
+			continue
 		}
+		validTokens = append(validTokens, rt)
 	}
 	account.RefreshTokens = validTokens
 }

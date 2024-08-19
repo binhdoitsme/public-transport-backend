@@ -7,6 +7,7 @@ import (
 	"public-transport-backend/internal/features/passenger/create"
 	passenger "public-transport-backend/internal/features/passenger/domain"
 	"public-transport-backend/internal/features/passenger/view"
+	"time"
 )
 
 // PassengerRepositoryStub is a stub implementation of the Repository interface.
@@ -167,7 +168,7 @@ func (r *AccountRepositoryStub) FindById(ctx context.Context, id uint64) (*ident
 }
 
 // FindByRefreshToken uses the TokenServiceStub to find an account by refresh token.
-func (r *AccountRepositoryStub) FindByRefreshToken(ctx context.Context, refreshToken string) (*identity.Account, error) {
+func (r *AccountRepositoryStub) FindByRefreshToken(ctx context.Context, refreshToken string, now time.Time) (*identity.Account, error) {
 	// Use the TokenService to parse the refresh token
 	account, err := r.TokenService.Parse(refreshToken)
 	if err != nil {
