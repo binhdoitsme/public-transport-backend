@@ -10,6 +10,8 @@ import (
 	"public-transport-backend/internal/features/passenger"
 	"public-transport-backend/internal/features/passenger/create"
 	"public-transport-backend/internal/features/passenger/view"
+	"public-transport-backend/internal/infrastructure/database"
+	"public-transport-backend/internal/infrastructure/database/repositories"
 	"public-transport-backend/internal/infrastructure/stubs"
 
 	"github.com/go-playground/validator"
@@ -64,7 +66,8 @@ func New() Dependencies {
 	validate := validator.New()
 	passengerRepository := stubs.NewPassengerRepository()
 	tokenService := stubs.NewTokenServices()
-	accountRepository := stubs.NewAccountRepository(tokenService)
+	db := database.New()
+	accountRepository := repositories.NewAccountRepository(db.GetDB())
 	passwordService := stubs.NewPasswordServices()
 	return &dependencies{
 		validate: validate,
