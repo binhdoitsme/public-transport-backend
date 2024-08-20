@@ -7,15 +7,18 @@ import (
 
 func AdminListPassengers(
 	ctx context.Context,
-	requestingUser *RequestingUser,
+	form *PassengerListForm,
 	dependencies *Dependencies,
 ) ([]PassengerResult, error) {
-	isAdmin, err := dependencies.Repository.IsAdminUser(ctx, requestingUser)
+	isAdmin, err := dependencies.AdminRepository.IsAdmin(ctx, form.UserId)
 	if !isAdmin || err != nil {
 		return nil, commonErrors.NotAnAdminError()
 	}
 
-	passengers, err := dependencies.Repository.FindAll(ctx)
+	passengers, err := dependencies.Repository.FindAll(ctx, &PassengerListSpecs{
+		Limit:  form.PageSize,
+		Offset: (form.Page - 1) * form.PageSize,
+	})
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)
 	}

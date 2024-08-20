@@ -10,7 +10,7 @@ func AdminViewPassenger(
 	form *AdminPassengerByIdForm,
 	dependencies *Dependencies,
 ) (*PassengerResult, error) {
-	isAdmin, err := dependencies.Repository.IsAdminUser(ctx, form.RequestingUser)
+	isAdmin, err := dependencies.AdminRepository.IsAdmin(ctx, form.RequestingUser.UserId)
 	if !isAdmin || err != nil {
 		return nil, commonErrors.NotAnAdminError()
 	}

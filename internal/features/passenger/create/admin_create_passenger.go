@@ -16,7 +16,7 @@ func AdminCreatePassenger(
 		return nil, err
 	}
 
-	isAdmin, err := dependencies.Repository.IsAdmin(ctx, form.MaybeAdmin)
+	isAdmin, err := dependencies.Repository.IsAdmin(ctx, form.MaybeAdmin.UserId)
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)
 	}

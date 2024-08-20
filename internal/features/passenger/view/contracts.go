@@ -7,22 +7,22 @@ import (
 	"github.com/go-playground/validator"
 )
 
+type PassengerListSpecs struct {
+	Limit  int
+	Offset int
+}
+
 type ViewPassengerRepository interface {
 	FindById(ctx context.Context, id uint64) (*passenger.Account, error)
-	FindByUserId(ctx context.Context, userId uint64) (*passenger.Account, error)
-	FindAll(ctx context.Context) ([]passenger.Account, error)
+	FindAll(ctx context.Context, specs *PassengerListSpecs) ([]passenger.Account, error)
 }
 
 type AdminRepository interface {
-	IsAdminUser(ctx context.Context, requestingUser *RequestingUser) (bool, error)
-}
-
-type Repository interface {
-	ViewPassengerRepository
-	AdminRepository
+	IsAdmin(ctx context.Context, userId uint64) (bool, error)
 }
 
 type Dependencies struct {
-	Validate   *validator.Validate
-	Repository Repository
+	Validate        *validator.Validate
+	AdminRepository AdminRepository
+	Repository      ViewPassengerRepository
 }

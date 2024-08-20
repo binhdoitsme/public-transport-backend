@@ -1,7 +1,6 @@
 package view
 
 import (
-	"fmt"
 	passenger "public-transport-backend/internal/features/passenger/domain"
 	"time"
 )
@@ -36,10 +35,8 @@ func ToResult(p *passenger.Account) *PassengerResult {
 
 func ToResults(ps []passenger.Account) []PassengerResult {
 	results := make([]PassengerResult, 0, len(ps))
-	fmt.Println(ps)
 	for _, p := range ps {
 		results = append(results, *ToResult(&p))
-		fmt.Println(results)
 	}
 	return results
 }

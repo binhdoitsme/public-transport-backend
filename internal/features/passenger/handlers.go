@@ -70,9 +70,25 @@ func (h *handler) handleListPassengers(ctx *gin.Context) {
 		UserId: userId.(uint64),
 	}
 
+	page := 1
+	pageSize := 50
+
+	if pageParam, exists := ctx.Params.Get("page"); exists {
+		page, _ = strconv.Atoi(pageParam)
+	}
+
+	if pageSizeParam, exists := ctx.Params.Get("pagesize"); exists {
+		pageSize, _ = strconv.Atoi(pageSizeParam)
+	}
+	form := &view.PassengerListForm{
+		RequestingUser: requestingUser,
+		Page:           page,
+		PageSize:       pageSize,
+	}
+
 	dependencies := h.dependencies.ViewDependenciesFactory()
 
-	passengers, err := view.AdminListPassengers(ctx, requestingUser, dependencies)
+	passengers, err := view.AdminListPassengers(ctx, form, dependencies)
 	if err != nil {
 		responses.Error(ctx, http.StatusInternalServerError, err.Error())
 		return

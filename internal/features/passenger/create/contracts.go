@@ -16,7 +16,7 @@ type CreatePassengerRepository interface {
 }
 
 type AdminRepository interface {
-	IsAdmin(ctx context.Context, maybeAdmin *MaybeAdmin) (bool, error)
+	IsAdmin(ctx context.Context, userId uint64) (bool, error)
 }
 
 type Repository interface {
