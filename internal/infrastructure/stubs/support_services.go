@@ -67,6 +67,15 @@ func (s *TokenServicesStub) Parse(token string) (*identity.Account, error) {
 	if err != nil {
 		return nil, errors.New("invalid token format")
 	}
+	ts, err := strconv.ParseInt(split[2], 10, 64)
+	if err != nil {
+		return nil, errors.New("invalid token format")
+	}
+	t := time.Unix(ts / 1_000_000_000, 0)
+	now := time.Now().UTC()
+	if now.Sub(t).Seconds() > 3600 {
+		return nil, errors.New("expired token")
+	}
 
 	// Find the account associated with the extracted account ID
 	account := &identity.Account{Id: uint64(accountId)}
