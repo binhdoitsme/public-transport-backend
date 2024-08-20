@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	identity "public-transport-backend/internal/features/identity/domain"
-	"public-transport-backend/internal/features/passenger/create"
 	passenger "public-transport-backend/internal/features/passenger/domain"
 	"public-transport-backend/internal/features/passenger/view"
 	"time"
@@ -46,20 +45,12 @@ func (r *PassengerRepositoryStub) Save(ctx context.Context, account *passenger.A
 }
 
 // IsAdmin checks if a given user is an admin.
-func (r *PassengerRepositoryStub) IsAdmin(ctx context.Context, maybeAdmin *create.MaybeAdmin) (bool, error) {
-	if maybeAdmin == nil {
-		return false, nil
-	}
-	isAdmin, exists := r.Admins[maybeAdmin.UserId]
+func (r *PassengerRepositoryStub) IsAdmin(ctx context.Context, userId uint64) (bool, error) {
+	isAdmin, exists := r.Admins[userId]
 	if !exists {
 		return false, nil
 	}
 	return isAdmin, nil
-}
-
-// IsAdmin checks if a given user is an admin.
-func (r *PassengerRepositoryStub) IsAdminUser(ctx context.Context, requestingUser *view.RequestingUser) (bool, error) {
-	return r.IsAdmin(ctx, &create.MaybeAdmin{UserId: requestingUser.UserId})
 }
 
 // FindById finds a passenger account by its ID.
@@ -72,18 +63,8 @@ func (r *PassengerRepositoryStub) FindById(ctx context.Context, id uint64) (*pas
 	return nil, nil
 }
 
-// FindByUserId finds a passenger account by its User ID.
-func (r *PassengerRepositoryStub) FindByUserId(ctx context.Context, userId uint64) (*passenger.Account, error) {
-	for _, account := range r.Passengers {
-		if account.Id == userId {
-			return account, nil
-		}
-	}
-	return nil, errors.New("account not found")
-}
-
 // FindAll returns a list of all passenger accounts.
-func (r *PassengerRepositoryStub) FindAll(ctx context.Context) ([]passenger.Account, error) {
+func (r *PassengerRepositoryStub) FindAll(ctx context.Context, specs *view.PassengerListSpecs) ([]passenger.Account, error) {
 	accounts := make([]passenger.Account, 0, len(r.Passengers))
 	for _, account := range r.Passengers {
 		accounts = append(accounts, *account)

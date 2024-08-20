@@ -17,6 +17,5 @@ type TokenServices interface {
 
 type Dependencies struct {
 	AccountRepository AccountRepository
-	Tokens            TokenServices
 	Validate          *validator.Validate
 }

@@ -14,13 +14,7 @@ func GetMyProfile(
 		return nil, err
 	}
 
-	accountInfo, err := dependencies.Tokens.Parse(form.AccessToken)
-
-	if err != nil {
-		return nil, commonErrors.ToGenericError(err)
-	}
-
-	account, err := dependencies.AccountRepository.FindById(ctx, accountInfo.Id)
+	account, err := dependencies.AccountRepository.FindById(ctx, form.UserId)
 
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)

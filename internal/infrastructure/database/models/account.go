@@ -11,7 +11,7 @@ type Account struct {
 	gorm.Model
 	ID            uint64 `gorm:"primaryKey;autoIncrement:false"`
 	Username      string
-	Password      string `gorm:"->:false"`
+	Password      string
 	Name          string
 	Role          string
 	PersonalImage string

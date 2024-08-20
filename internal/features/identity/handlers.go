@@ -42,11 +42,12 @@ func (h *handler) handleNewProfile(ctx *gin.Context) {
 }
 
 func (h *handler) handleGetMyProfile(ctx *gin.Context) {
-	form := &me.GetMyProfileForm{}
-	if err := ctx.BindJSON(form); err != nil {
-		responses.Error(ctx, http.StatusBadRequest, commonErrors.ToValidationError(err).Error())
+	userId, exists := ctx.Get("userId")
+	if !exists {
+		responses.Error(ctx, http.StatusBadRequest, commonErrors.NotAuthorizedError().Error())
 		return
 	}
+	form := &me.GetMyProfileForm{UserId: userId.(uint64)}
 
 	result, err := me.GetMyProfile(ctx, form, h.dependencies.GetMyProfileDependenciesFactory())
 	if err != nil {
@@ -71,13 +72,6 @@ func (h *handler) handleNewTokenPair(ctx *gin.Context) {
 		responses.Data(ctx, http.StatusUnauthorized, result)
 		return
 	}
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:     "token",
-		Value:    result.AccessToken,
-		Path:     "/",
-		MaxAge:   3600,
-		HttpOnly: true,
-	})
 	responses.Data(ctx, http.StatusCreated, result)
 }
 
@@ -139,24 +133,9 @@ func InitAPIHandlers(g *gin.RouterGroup, dependencies Dependencies) {
 
 func InitMiddlewares(g *gin.RouterGroup, dependencies Dependencies) {
 	g.Use(func(ctx *gin.Context) {
-		token, err := ctx.Cookie("token")
-		if err != nil {
-			return
-		}
+		token := ctx.GetHeader("Authorization")
 		account, err := dependencies.CreateTokenPairDependenciesFactory().Tokens.Parse(token)
-		if err != nil {
-			http.SetCookie(ctx.Writer, &http.Cookie{
-				Name:     "token",
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			})
-			return
-		}
-
-		// set user info from token
-		if account == nil {
+		if err != nil || account == nil {
 			return
 		}
 		ctx.Set("userId", account.Id)

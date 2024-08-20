@@ -9,19 +9,18 @@ func NewTokenPair(ctx context.Context, form *NewTokensForm, dependencies *Depend
 	if err := form.Validate(dependencies.Validate); err != nil {
 		return nil, err
 	}
-	maybeStoredPassword, err := dependencies.Passwords.ToStoredForm(ctx, form.Password)
-
-	if err != nil {
-		return nil, commonErrors.ToGenericError(err)
-	}
-
-	account, err := dependencies.AccountRepository.FindByUsernameAndPassword(ctx, form.Username, maybeStoredPassword)
+	account, err := dependencies.AccountRepository.FindByUsername(ctx, form.Username)
 
 	if err != nil {
 		return nil, commonErrors.ToGenericError(err)
 	}
 
 	if account == nil {
+		return &SessionResult{}, nil
+	}
+
+	isCorrectPassword := dependencies.Passwords.Compare(ctx, account.Password, form.Password)
+	if !isCorrectPassword {
 		return &SessionResult{}, nil
 	}
 

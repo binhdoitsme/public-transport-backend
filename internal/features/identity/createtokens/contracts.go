@@ -8,7 +8,7 @@ import (
 )
 
 type AccountRepository interface {
-	FindByUsernameAndPassword(ctx context.Context, phoneNumber string, password string) (*identity.Account, error)
+	FindByUsername(ctx context.Context, username string) (*identity.Account, error)
 	Save(ctx context.Context, account *identity.Account) (uint64, error)
 }
 
@@ -19,7 +19,7 @@ type TokenServices interface {
 }
 
 type PasswordServices interface {
-	ToStoredForm(ctx context.Context, password string) (string, error)
+	Compare(ctx context.Context, stored string, entered string) bool
 }
 
 type Dependencies struct {

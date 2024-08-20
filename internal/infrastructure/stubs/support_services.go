@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	identity "public-transport-backend/internal/features/identity/domain"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -53,16 +55,29 @@ func (s *TokenServicesStub) NewAccessToken(ctx context.Context, account *identit
 }
 
 // Parse retrieves the account associated with a given token.
-func (s *TokenServicesStub) Parse(accessToken string) (*identity.Account, error) {
-	// Check if it's an access token
-	if account, exists := s.accessTokens[accessToken]; exists {
-		return account, nil
+func (s *TokenServicesStub) Parse(token string) (*identity.Account, error) {
+	// Example of token format: "access-<account_id>-<timestamp>" or "refresh-<account_id>-<timestamp>"
+	split := strings.Split(token, "-")
+	n := len(split)
+	if n < 3 {
+		return nil, errors.New("invalid token format")
 	}
-	// Check if it's a refresh token
-	if account, exists := s.refreshTokens[accessToken]; exists {
-		return account, nil
+	accountId, err := strconv.Atoi(split[1])
+	tokenType := split[0]
+	if err != nil {
+		return nil, errors.New("invalid token format")
 	}
-	return nil, errors.New("invalid token")
+
+	// Find the account associated with the extracted account ID
+	account := &identity.Account{Id: uint64(accountId)}
+
+	// Optionally, check if the token type is valid (e.g., "access" or "refresh")
+	if tokenType != "access" && tokenType != "refresh" {
+		return nil, errors.New("invalid token type")
+	}
+
+	// Return the account if found and valid
+	return account, nil
 }
 
 // PasswordServicesStub is a stub implementation of the PasswordServices interface.
@@ -80,4 +95,8 @@ func (p *PasswordServicesStub) ToStoredForm(ctx context.Context, password string
 	}
 	// In a real implementation, this would hash the password, but here we just append "_hashed" for the stub.
 	return password, nil
+}
+
+func (p *PasswordServicesStub) Compare(ctx context.Context, stored string, entered string) bool {
+	return entered != stored
 }

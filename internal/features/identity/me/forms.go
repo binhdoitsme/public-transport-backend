@@ -7,7 +7,7 @@ import (
 )
 
 type GetMyProfileForm struct {
-	AccessToken string `json:"accessToken" validate:"required"`
+	UserId uint64 `validate:"required"`
 }
 
 func (form *GetMyProfileForm) Validate(validate *validator.Validate) error {

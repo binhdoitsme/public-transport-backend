@@ -68,8 +68,8 @@ func (r *AccountRepositoryOnGorm) ExistsByUsername(ctx context.Context, username
 }
 
 // FindByPhoneNumberAndPassword searches for an account by phone number and password.
-func (r *AccountRepositoryOnGorm) FindByUsernameAndPassword(ctx context.Context, username string, password string) (*identity.Account, error) {
-	account := &models.Account{Username: username, Password: password}
+func (r *AccountRepositoryOnGorm) FindByUsername(ctx context.Context, username string) (*identity.Account, error) {
+	account := &models.Account{Username: username}
 	result := r.db.WithContext(ctx).Limit(1).Preload("RefreshTokens").Find(account)
 	if err := result.Error; err != nil {
 		return nil, err
