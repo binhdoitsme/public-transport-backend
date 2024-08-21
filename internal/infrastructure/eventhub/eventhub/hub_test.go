@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"public-transport-backend/internal/infrastructure/eventhub/eventhub" // Update with the correct import path
+
 	"github.com/stretchr/testify/assert"
-	"public-transport-backend/internal/infrastructure/eventhub" // Update with the correct import path
 )
 
 func TestEventHub_AddTopic(t *testing.T) {
