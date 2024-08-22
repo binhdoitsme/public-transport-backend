@@ -25,7 +25,8 @@ type Repository interface {
 }
 
 type Dependencies struct {
-	Validate       *validator.Validate
-	Repository     Repository
-	EventPublisher CreatePassengerEventPublisher
+	Validate        *validator.Validate
+	AdminRepository AdminRepository
+	Repository      CreatePassengerRepository
+	EventPublisher  CreatePassengerEventPublisher
 }

@@ -12,6 +12,9 @@ import (
 	"public-transport-backend/internal/features/passenger/view"
 	"public-transport-backend/internal/infrastructure/database"
 	"public-transport-backend/internal/infrastructure/database/repositories"
+	"public-transport-backend/internal/infrastructure/eventhub/eventhub"
+	"public-transport-backend/internal/infrastructure/eventhub/passengerhub"
+	"public-transport-backend/internal/infrastructure/password"
 	"public-transport-backend/internal/infrastructure/stubs"
 
 	"github.com/go-playground/validator"
@@ -64,21 +67,29 @@ func (d *dependencies) GetMyProfileDependenciesFactory() *me.Dependencies {
 
 func New() Dependencies {
 	validate := validator.New()
-	passengerRepository := stubs.NewPassengerRepository()
 	tokenService := stubs.NewTokenServices()
+	passwordService := password.NewPasswordServices()
+
 	db := database.New()
 	accountRepository := repositories.NewAccountRepository(db.GetDB())
-	passwordService := stubs.NewPasswordServices()
+	passengerRepository := repositories.NewPassengerRepository(db.GetDB())
+
+	hub := eventhub.New()
+	defer hub.Start()
+	passengerHub := passengerhub.New(hub)
+
 	return &dependencies{
 		validate: validate,
 		createPassengerDependencies: &create.Dependencies{
-			Validate:       validate,
-			Repository:     passengerRepository,
-			EventPublisher: nil,
+			Validate:        validate,
+			AdminRepository: accountRepository,
+			Repository:      passengerRepository,
+			EventPublisher:  passengerHub,
 		},
 		viewPassengerDependencies: &view.Dependencies{
-			Validate:   validate,
-			Repository: passengerRepository,
+			Validate:        validate,
+			AdminRepository: accountRepository,
+			Repository:      passengerRepository,
 		},
 
 		createTokenPairDependencies: &createtokens.Dependencies{
@@ -104,7 +115,6 @@ func New() Dependencies {
 		getMyProfileDependencies: &me.Dependencies{
 			Validate:          validate,
 			AccountRepository: accountRepository,
-			Tokens:            tokenService,
 		},
 	}
 }

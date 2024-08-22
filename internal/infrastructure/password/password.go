@@ -21,3 +21,7 @@ func (p *PasswordServices) Compare(ctx context.Context, stored string, entered s
 	err := bcrypt.CompareHashAndPassword([]byte(stored), []byte(entered))
 	return err != nil
 }
+
+func NewPasswordServices() *PasswordServices {
+	return &PasswordServices{}
+}
